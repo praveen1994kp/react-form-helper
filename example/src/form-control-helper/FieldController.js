@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { Children, cloneElement, createContext, useContext, useMemo } from 'react'
+import { formatRule } from './rule-parse-helpers'
 
 export const FieldsConfigurationContext = createContext({
     noRead: null,
@@ -8,16 +9,10 @@ export const FieldsConfigurationContext = createContext({
     rulesList: null,
     ruleSyntaxToJsMap: null,
     disabledPropName: null,
-    requiredPropName: null
+    requiredPropName: null,
+    formStateContext: null
 })
 
-const DEFAULT_RULE_SYNTAX_TO_JS_MAP = {
-    '}': '',
-    '=': '===',
-    'AND': '&&',
-    'OR': '||',
-    '-ne': '!=='
-}
 
 const RULE_BEHAVIOUR = {
     DISABLE: 'DISABLE',
@@ -25,27 +20,16 @@ const RULE_BEHAVIOUR = {
     MANDATE: 'MANDATE'
 }
 
-function formatRule(ruleStr, formStateObjArgName, ruleSyntaxToJsMap) {
-    const finalSyntaxMapper = ruleSyntaxToJsMap ? {...DEFAULT_RULE_SYNTAX_TO_JS_MAP, ruleSyntaxToJsMap} : DEFAULT_RULE_SYNTAX_TO_JS_MAP
-
-    if (typeof ruleStr !== 'string') return ''
-
-    const withFormStateObjRef = ruleStr.replaceAll('${', formStateObjArgName + '.')
-    let jsFunctionDefn = withFormStateObjRef
-
-    jsFunctionDefn = Object.keys(finalSyntaxMapper).reduce((jsRule, ruleKey) => {
-        return jsRule.replaceAll(ruleKey, finalSyntaxMapper[ruleKey])
-    }, jsFunctionDefn)
-
-    return `return ${jsFunctionDefn}`
-}
-
 const RULE_FLAGS_DEFAULT_VAL = {disabledByRule: false, hiddenByRule: false, requiredByRule: false}
 
-export function FieldController ({fieldName, children, formState}) {
+export function FieldController ({fieldName, children, formState: formStateFromProp, shouldDisableField, shouldHideField, shouldMandateField}) {
     if (!fieldName) return <>{children}</>
     const {noEdit, noRead, required, 
-        rulesList, requiredPropName, disabledPropName} = useContext(FieldsConfigurationContext)
+        rulesList, requiredPropName, disabledPropName, formStateContext} = useContext(FieldsConfigurationContext)
+
+    const formStateContextVal = useContext(formStateContext)
+
+    const formState = formStateContextVal?.formState || formStateFromProp
 
     const hasRules = useMemo(() => {
         if (!rulesList || !(rulesList[fieldName]) || rulesList[fieldName].length < 1) return false
@@ -57,7 +41,7 @@ export function FieldController ({fieldName, children, formState}) {
         let returnVal = RULE_FLAGS_DEFAULT_VAL
 
         try {
-            if (!hasRules) return returnVal
+            if (!hasRules || !formState) return returnVal
 
             const rules = rulesList[fieldName] || []
 
@@ -96,10 +80,12 @@ export function FieldController ({fieldName, children, formState}) {
 
     }, [hasRules, formState]) || {}
 
-    if ((noRead && noRead.includes(fieldName)) || hiddenByRule) return null
+    const isNoRead = (noRead && noRead.includes(fieldName)) || hiddenByRule || (typeof shouldHideField === 'function' && shouldHideField(formState))
 
-    const isRequired = (required && required.includes(fieldName)) || requiredByRule
-    const isNoEdit = (noEdit && noEdit.includes(fieldName)) || disabledByRule
+    if (isNoRead) return null
+
+    const isRequired = (required && required.includes(fieldName)) || requiredByRule || (typeof shouldMandateField === 'function' && shouldMandateField(formState))
+    const isNoEdit = (noEdit && noEdit.includes(fieldName)) || disabledByRule || (typeof shouldDisableField === 'function' && shouldDisableField(formState))
 
     if (isNoEdit || isRequired) {
         return Children.map(children, (child) => {
