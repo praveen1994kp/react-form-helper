@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { useContext } from 'react'
-import { FieldController } from '../form-control-helper/FieldController'
+import { FieldController } from 'react-form-control-helper'
 import { SampleFormStateContext } from './SampleFormContainer'
 
 function TextField ({value, onChange, label = 'Text Field', ...props}) {

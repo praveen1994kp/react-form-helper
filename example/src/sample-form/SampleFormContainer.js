@@ -1,5 +1,5 @@
 import React, { createContext, useState } from 'react'
-import { FieldsConfigurationContext } from '../form-control-helper/FieldController'
+import { FieldsConfigurationContext } from 'react-form-control-helper'
 import { SampleFormDisplay } from './SampleFormDisplay'
 
 export const SampleFormStateContext = createContext({formState: null})

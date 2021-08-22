@@ -1,0 +1,35 @@
+{
+  "name": "react-form-control-helper",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/FieldController.js",
+  "exports": {
+    ".": "./dist/FieldController.js"
+  },
+  "scripts": {
+    "build": "babel src -d dist",
+    "build:watch": "babel src -d ./example/node_modules/react-form-control-helper/dist --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/praveen1994kp/react-form-helper.git"
+  },
+  "author": "Praveen Kumaravel <praveen1994kp@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/praveen1994kp/react-form-helper/issues"
+  },
+  "homepage": "https://github.com/praveen1994kp/react-form-helper#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-react": "^7.14.5",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
