@@ -40,12 +40,27 @@ import { FieldsConfigurationContext } from  'react-form-control-helper'
 
 Usage:
 ~~~
+const sampleConfig = {noEdit: ['country'], noRead: ['hiddenField'], required: ['firstName'], rulesList: {
+    state: [{
+        behaviour: 'DISABLE',
+        condition: '${city} = \'Chennai\''
+    }, {
+        behaviour: 'HIDE',
+        condition: '${city} AND !([\'chennai\', \'hyderabad\', \'bangalore\', \'pune\'].includes(${city}.toLowerCase()))'
+    }],
+    country: [{
+        behaviour: 'HIDE',
+        condition: '${city} AND !([\'chennai\', \'hyderabad\', \'bangalore\', \'pune\'].includes(${city}.toLowerCase()))'
+    }
+    ]
+}}
 return (
 	<FieldsConfigurationContext.Provider value={{...sampleConfig, formStateContext: SampleFormStateContext}}>
 		<SampleFormDisplay onChange={setFormState}  />
 	</FieldsConfigurationContext.Provider>
 )
 ~~~
+
 ##### Specs for config
 1. **Config**
 
@@ -54,6 +69,7 @@ return (
 | noEdit    | array  | ['country']        |
 | noRead    | array  | ['hiddenField']    |
 | required  | array  | firstName          |
+| formStateContext | Context |  |
 | rulesList | object | *refer table below |
 | disabledPropName  | string | 'isDisabled'        |
 | requiredPropName  | string | 'isRequired'        |
@@ -110,6 +126,21 @@ Default mapping from special syntax to javascript:
 }
 ~~~
 This can be further enhanced/overridden by passing ruleSyntaxToJsMap to the config in the context.
+
+
+#### 3. Linking your state to the controller
+There are 2 ways to pass your form's state to the FieldController.
+Please note that the state should contain all the states without any nesting.
+- Using props:
+The FieldController component accepts a prop **formState** that can be used to pass the state object.
+- Using Context API:
+Alternatively, the form state can be set to a context, and the context can be passed to the root level FieldsConfigurationContext.Provider's value object with key **formStateContext** as in
+~~~
+	<FieldsConfigurationContext.Provider value={{...sampleConfig, formStateContext: SampleFormStateContext}}>
+		<SampleFormDisplay onChange={setFormState}  />
+	</FieldsConfigurationContext.Provider>
+~~~
+The state passed from context is prioritised over the value from prop.
 
 ### Running the Example Project:
 
